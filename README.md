@@ -1,22 +1,27 @@
-# nodejs学习实操及笔记
-## 为什么学nodejs
+# node.js学习实操及笔记
+> 温故node.js，node.js学习实操过程及笔记~
+- [node.js学习视频](https://www.bilibili.com/video/BV1gM411W7ex?p=1&vd_source=4046650f4b6e75ab86067f7a5a418626)
+- [node.js官网](https://node.js.org/en/download/package-manager)
+- [node.js中文网](https://node.js.cn/download/)
+
+## 为什么学node.js
 1. 可以让别人访问我们编写的网页
-2. 为后续的框架学习打下基础，三大框架vue react angular离不开nodejs
-## nodejs是什么
-* 官网：nodejs是一个开源的、跨平台的运行JavaScript的运行环境。 
+2. 为后续的框架学习打下基础，三大框架vue react angular离不开node.js
+## node.js是什么
+* 官网：node.js是一个开源的、跨平台的运行JavaScript的运行环境。 
 * 通俗理解: 一款应用程序，一款软件，可以运行JavaScript
-## nodejs作用
+## node.js作用
 1. 开发服务器应用
 2. 开发工具类应用
 3. 开发桌面类应用
-## nodejs安装
-- [nodejs官网](https://nodejs.org/en/download/package-manager)
-- [nodejs中文网](https://nodejs.cn/download/)
+## node.js安装
+- [node.js官网](https://node.js.org/en/download/package-manager)
+- [node.js中文网](https://node.js.cn/download/)
 - [全部版本安装包淘宝镜像](https://registry.npmmirror.com/binary.html?path=node/v20.13.0/)
 > 点击安装，傻瓜式安装。
 
-- PS:推荐使用`nvm`方式安装`nodejs`，这样可实现自由切换版本好。
-> 因为有的老项目nodejs可能是12版本的，新项目又是18或者20版本。具体安装自行查阅，目前这边已经安装，忘记哪个博主写的较好就不推荐了。
+- PS:推荐使用`nvm`方式安装`node.js`，这样可实现自由切换版本好。
+> 因为有的老项目node.js可能是12版本的，新项目又是18或者20版本。具体安装自行查阅，目前这边已经安装，忘记哪个博主写的较好就不推荐了。
 
 检测安装是否成功,输入以下命令到命令行，出来版本号代表安装成功
 ```shell
@@ -24,17 +29,17 @@ node -v
 ```
 - 若安装失败，考虑大可能为环境变量配置问题影响
 
-## nodejs初体验
+## node.js初体验
 1. 新建hello.js
 ```javascript
-console.log("hello nodejs!");
+console.log("hello node.js!");
 ```
 2. 切换到当前目录，终端打开
-3. 执行代码，看到 hello nodejs
+3. 执行代码，看到 hello node.js
 ```shell
 node hello.js
 ```
-## nodejs注意事项
+## node.js注意事项
 * node.js不能使用BOM、DOM的API，可以使用console和定时器API
 * node.js中顶级对象为global,也可以用globalThis访问顶级对象
 ```javascript
@@ -388,8 +393,8 @@ fs.rename('./infoSync.txt', './file/infoMove.txt', err => {
 * 异步删除语法 fs.`unlink`(path,callback)
 * 同步删除语法fs.`unlinkSync`(path)
 
-* 异步删除fs.`rm`(path,callback) ps:nodejs14.4版本以上才可用
-* 同步删除fs.`rmSync`(path) ps:nodejs14.4版本以上才可用
+* 异步删除fs.`rm`(path,callback) ps:node.js14.4版本以上才可用
+* 同步删除fs.`rmSync`(path) ps:node.js14.4版本以上才可用
 
 参数说明:
 * path:文件路径
@@ -409,7 +414,7 @@ fs.unlink('./info.txt', (err) => {
 })
 fs.unlinkSync('./infoSync.txt');
 
-// rm删除 nodejs14.4版本以上
+// rm删除 node.js14.4版本以上
 fs.rm('./writeStream.txt', (err) => {
     if (err) {
         console.error(err);
