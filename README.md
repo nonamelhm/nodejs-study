@@ -30,15 +30,17 @@ node -v
 - 若安装失败，考虑大可能为环境变量配置问题影响
 
 ## node.js初体验
-1. 新建hello.js
+1. 当前目录新建hello.js
 ```javascript
 console.log("hello node.js!");
 ```
 2. 切换到当前目录，终端打开
 3. 执行代码，看到 hello node.js
+注意：运行命令为`node + 文件路径` =》hello.js是相对文件路径，这里省略了`./hello.js`
 ```shell
 node hello.js
 ```
+
 ## node.js注意事项
 * node.js不能使用BOM、DOM的API，可以使用console和定时器API
 * node.js中顶级对象为global,也可以用globalThis访问顶级对象
