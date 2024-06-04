@@ -661,3 +661,116 @@ files.forEach(file => {
     fs.renameSync(oldPath, newPath);
 })
 ```
+## path模块
+>path模块提供了操作路径的功能。
+
+* 常用API如下：
+
+| API             | 说明             |
+|-----------------|----------------|
+| path.`resolve`  | 拼接规范的绝对路径 `常用` |
+| path.`sep`      | 获得操作系统的路径分隔符   |
+| path.`parse`    | 解析路径并返回对象      |
+| path.`basename` | 获得路径基础名称       |
+| path.`dirname`  | 获得路径目录名        |
+| path.`extname`  | 获得路径扩展名        |
+
+### resolve(重点掌握)
+代码示例：
+```javascript
+// path模块
+const fs = require('fs');
+const path = require('path');
+// 写入文件
+// 建议绝对路径 +拼接+ 相对路径 写法 path.resolve(绝对路径+相对路径)
+fs.writeFileSync(path.resolve(__dirname, './test.txt'), 'peace and love');
+// 不建议这样写 最好不要 绝对路径＋绝对路径写法  /path为绝对路径
+// 这样写的意思是 /path的绝对路径  +拼接+ ./test.txt
+// fs.writeFileSync(path.resolve(__dirname, '/path', './test.txt'), 'peace and love');
+
+```
+运行命令
+```shell
+node ./path/path.js
+```
+### sep
+> sep分隔符 ：不同操作系统的分隔符不同，获取不同操作系统下的分隔符
+
+| 操作系统            | 分隔符 |
+|-----------------|-----|
+| windows         | \   |
+| linux           | /   |
+| macos           | /   |
+
+代码示例：
+```javascript
+const path = require('path');
+// sep分隔符 ：不同操作系统的分隔符不同，获取不同操作系统下的分隔符
+console.log(path.sep);  //windows:\   linux:/    macos:/
+```
+### path
+* 解析路径返回对象=》语法: path.`parse`(path)
+
+参数说明：
+* path:文件解析路径
+
+代码示例：
+```javascript
+// parse  解析路径并返回对象
+// 查看当前文件路径
+console.log(__filename);
+//定义路径
+let str = '/Users/lhm/Documents/nodejs/path/path.js'
+// 解析路径
+console.log(path.parse(str));
+```
+### basename
+* 获得文件名=》语法: path.`basename`(path)
+
+参数说明：
+* path:文件解析路径
+
+代码示例：
+```javascript
+// basename  获取路径名称
+// 查看当前文件路径
+console.log(__filename);
+//定义路径
+let str = '/Users/lhm/Documents/nodejs/path/path.js'
+// 获取的文件名
+console.log(path.basename(str)); //path.js
+```
+
+### dirname
+* 获得文件夹的目录名=》语法: path.`dirname`(path)
+
+参数说明：
+* path:文件解析路径
+
+代码示例：
+```javascript
+// dirname  获取文件目录名
+// 查看当前文件路径
+console.log(__filename);
+//定义路径
+let str = '/Users/lhm/Documents/nodejs/path/path.js'
+// 获取文件目录名
+console.log(path.dirname(str)); //  /Users/lhm/Documents/nodejs/path
+```
+
+### extname
+* 获得文件扩展名（即为后缀名）=》语法: path.`extname`(path)
+
+参数说明：
+* path:文件解析路径
+
+代码示例：
+```javascript
+// extname  获取文件扩展名即为后缀名
+// 查看当前文件路径
+console.log(__filename);
+//定义路径
+let str = '/Users/lhm/Documents/nodejs/path/path.js'
+// 获取文件扩展名
+console.log(path.extname(str)); //  .js
+```
