@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        table td {
+            border-collapse: collapse;
+            padding: 40px;
+            cursor: pointer;
+        }
+
+        table tr:nth-child(odd) {
+            background-color: aqua;
+        }
+
+        table tr:nth-child(even) {
+            background-color: pink;
+        }
+
+    </style>
+</head>
+<body>
+<table>
+    <tbody>
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    </tbody>
+</table>
+<script>
+    const tds = document.querySelectorAll('td');
+    tds.forEach(item => {
+        item.onclick = function () {
+            this.style.background = '#222';
+        }
+    })
+</script>
+</body>
+</html>

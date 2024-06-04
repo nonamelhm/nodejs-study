@@ -1,8 +1,8 @@
 # node.js学习实操及笔记
 > 温故node.js，node.js学习实操过程及笔记~
 - [node.js学习视频](https://www.bilibili.com/video/BV1gM411W7ex?p=1&vd_source=4046650f4b6e75ab86067f7a5a418626)
-- [node.js官网](https://node.js.org/en/download/package-manager)
-- [node.js中文网](https://node.js.cn/download/)
+- [node.js官网](https://node.js.org/en)
+- [node.js中文网](https://node.js.cn)
 
 ## 为什么学node.js
 1. 可以让别人访问我们编写的网页
@@ -868,6 +868,8 @@ console.log(path.extname(str)); //  .js
 [点击查看更多响应头](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers)
 
 #### 响应体
+> 响应体即响应的内容
+
 常见的响应体格式有：
 1. HTML
 2. CSS
@@ -898,8 +900,299 @@ console.log(path.extname(str)); //  .js
 作用：
 * 实现不同主机应用程序之间的通信
 
+## http模块
+### 创建http服务端
+代码示例：./http/createServer.js
+```javascript
+// 创建服务
+// 1.导入http模块
+const http = require('http');
+// 2.创建服务对象
+const server = http.createServer((request, response) => {
+    //设置响应内容
+    response.end('Hello World! Hello node.js Server!');
+});
+// 3.监听端口，启动服务
+server.listen(9000, () => {
+    console.log("Server started on port 9000...");
+    console.log('http://localhost:9000/');
+})
+```
+#### 注意事项
+1. 命令行`ctrl + c`停止服务
+2. 当服务启动后，更新代码`必须重启服务才能生效`
+3. 响应内容中文乱码的解决方法
+```javascript
+response.setHeader('content-type','text/html;charset=utf-8')
+```
+4. 端口号被占用
+* 关闭当前正在运行监听端口的服务`使用较多`
+* 修改其他端口号
+
+5. HTTP协议默认端口号是80。HTTP服务开发常用端口有3000,8080,8090,9000等
 
 
+### 获取http请求报文
+想要获取请求的数据，需要通过`request`对象
+
+| 含义         | 语法                                                                       | 重点掌握 |
+  |------------|--------------------------------------------------------------------------|----|
+| 请求方法       | request.method                                                           | *  |
+| 请求http协议版本 | request.httpVersion                                                      |    |
+| 请求路径       | request.url                                                              | *  |
+| 请求头        | request.headers                                                          | *  |
+| 请求体        | request.on('data',function(chunk){})<br/>request.on('end',function(){}); |    |
+| url请求路径    | const url = require('url'); url.parse(request.url).pathname;             | *  |
+| url查询字符串   | const url = require('url'); url.parse(request.url,true).query;           |    |
+
+**注意事项：**
+1. request.ur;只能获取路径以及查询的字符串，无法获取URL中的域名以及协议的内容
+2. request.headers将请求信息转化为一个对象，并将属性名都转换成了【小写】
+3. 关于路径：如果访问网站的时候，只写了IP地址或者是域名信息，此时请求的路径为【/】
+4. 关于favicon.ico：这个请求是属于浏览器自动发送的请求
+
+#### 请求头
+代码示例：./http/request_header.js
+
+**ps:浏览器打开form.html输入提交进行测试**
+**ps:当端口被占用，关闭其它运行9000端口的终端，或者修改运行端口号。**
+```javascript
+// 请求报文之请求头
+
+//引入http模块
+const http = require("http");
+//创建服务对象
+const server = http.createServer((request, response) => {
+    // 1-----请求头
+    //请求方法
+    console.log('请求方法');
+    console.log(request.method);
+    // 请求http版本
+    console.log('请求http版本');
+    console.log(request.httpVersion);
+    // 请求头
+    console.log('请求url');
+    console.log(request.headers.host);
+    // 请求路径
+    console.log('请求路径');
+    console.log(request.url);
+})
+//启动服务
+server.listen(9000, () => {
+    console.log('server listening on port 9000,');
+    console.log("http://localhost:9000/");
+})
+
+```
+#### 请求体
+代码示例：./http/request_content.js
+
+**ps:浏览器打开form.html输入提交进行测试**
+**ps:当端口被占用，关闭其它运行9000端口的终端，或者修改运行端口号。**
+```javascript
+// 请求报文之请求体
+
+//引入http模块
+const http = require("http");
+//创建服务对象
+const server = http.createServer((request, response) => {
+  // ----请求体
+  // 定义请求体内容
+  let body = '';
+  request.on('data', (chunk) => {
+    body += chunk;
+  })
+  request.on('end', () => {
+    console.log('请求体内容：')
+    console.log(body);
+    console.log('--------end--------------')
+    response.end('hello world!');
+  })
+})
+//启动服务
+server.listen(9000, () => {
+  console.log('server listening on port 9000,');
+  console.log("http://localhost:9000/");
+})
+
+```
+#### 请求路径与查询关键字
+1. 方式1：通过内置url解析
+* 请求路径语法：url.parse(request.url).pathname)
+* 查询字符串语法：url.parse(request.url,true).query
+
+注意事项：
+2. 运行：当端口被占用，关闭其它运行9000端口的终端，或者修改运行端口号。
+2. 在浏览器输入进行测试观察终端打印日志：[点击跳转浏览器进行测试](http://localhost:9000/home?username=hhh&password=999)
+
+代码示例：./http/request_url.js
+````javascript
+// 请求报文之url
+
+//引入http模块
+const http = require("http");
+const url = require("url");
+//创建服务对象
+const server = http.createServer((request, response) => {
+    // ----url
+    console.log('请求路径：')
+    console.log(url.parse(request.url).pathname);
+    console.log('查询字符串：')
+    console.log(url.parse(request.url,true).query);
+    console.log(url.parse(request.url,true).query.username);
+    console.log(url.parse(request.url,true).query.password);
+    console.log('---------------');
+    response.end('hello world!');
+})
+//启动服务
+server.listen(9000, () => {
+    console.log('server listening on port 9000,');
+    console.log("http://localhost:9000/");
+})
+
+````
+2. 方式2：通过new URL解析
+* 语法：new URL(input[,base])
+
+* [点击了解更多new URL英文](https://nodejs.org/docs/latest/api/url.html#new-urlinput-base)
+* [点击了解更多new URL中文](https://nodejs.cn/api/url.html#new-urlinput-base)
 
 
+**注意事项：**
+1. 运行：当端口被占用，关闭其它运行9000端口的终端，或者修改运行端口号。
+2. 在浏览器输入进行测试观察终端打印日志：[点击跳转浏览器进行测试](http://localhost:9000/home?username=hhh&password=999)
 
+代码示例：./http/request_newURL.js
+````javascript
+// 请求报文之url
+
+//引入http模块
+const http = require("http");
+//创建服务对象
+const server = http.createServer((request, response) => {
+  // 2- 通过new URL方式获取
+  let url = new URL(request.url, 'http://localhost:9000');
+  console.log(url);
+  console.log('请求路径：')
+  console.log(url.pathname);
+  console.log('查询字符串');
+  console.log(url.searchParams.get('username'));
+  console.log('------------------')
+})
+//启动服务
+server.listen(9000, () => {
+  console.log('server listening on port 9000,');
+  console.log("http://localhost:9000/");
+})
+
+````
+### http请求练习
+
+**注意事项：**
+1. 运行：当端口被占用，关闭其它运行9000端口的终端，或者修改运行端口号。
+2. 在浏览器输入进行测试观察终端打印日志：
+  - [登录页面：点击跳转浏览器进行测试](http://localhost:9000/login?username=hhh&password=999)
+  - [注册页面：点击跳转浏览器进行测试](http://localhost:9000/reg?username=hhh&password=999)
+  - [不存在：点击跳转浏览器进行测试](http://localhost:9000/noFound?username=hhh&password=999)
+```javascript
+/** http练习
+ * 需求
+ * 请求类型 get 地址/login 返回 “登录页面” 四字
+ * 请求类型 get 地址/reg 返回 “注册页面” 四字
+ */
+const http = require('http');
+const server = http.createServer((req, res) => {
+    if (req.method === 'GET') {
+        let url = new URL(req.url, 'http://127.0.0.1:9000');
+        //设置中文防止乱码
+        res.setHeader('Content-Type', 'text/html; charset=UTF-8');
+        if (url.pathname === '/login') {
+            res.end('登录页面');
+        } else if (url.pathname === '/reg') {
+            res.end('注册页面');
+        } else {
+            res.end('您当前访问页面不存在！');
+        }
+    } else {
+        res.end('您当前访问页面不存在！');
+    }
+});
+server.listen(9000, () => {
+    console.log('Server started on port 9000,');
+    console.log('http://localhost:9000,');
+})
+```
+### 设置http响应报文
+
+| 作用       | 语法                                       | 
+  |----------|------------------------------------------|
+| 设置响应状态码  | response.statusCode                      |
+| 设置响应状态描述 | response.statusMessage(用的非常少）            | 
+| 设置响应头信息  | response.setHeader('头名','头值')            | 
+| 设置响应体    | response.write('xx');response.end('xx'); | 
+
+**注意事项：**
+1. 运行：当端口被占用，关闭其它运行9000端口的终端，或者修改运行端口号。
+2. 在浏览器输入此url进行请求，打开浏览器——右键检查——查看网络：
+- [点击跳转浏览器进行测试](http://localhost:9000/login)
+
+
+代码示例：
+```javascript
+// 设置响应头
+
+//引入http模块
+const http = require("http");
+//创建服务对象
+const server = http.createServer((request, response) => {
+    // 设置响应
+    //响应状态码
+    response.statusCode = 200;
+    //设置响应状态信息
+    response.statusMessage = 'iloveyou';
+    // 设置响应头
+    // 设置编码格式 防止中文乱码
+    response.setHeader('content-type', 'text/html; charset=utf-8');
+    // 自定义响应头
+    response.setHeader('myHeaders', 'Authorization');
+    //响应体 write可有多个
+    response.write('哈哈哈哈 响应体');
+    response.write('哈哈哈哈2 响应体');
+    // 响应体 end 只有一个
+    response.end('bye!!')
+});
+//启动服务
+server.listen(9000, () => {
+    console.log('server listening on port 9000,');
+    console.log("http://localhost:9000/");
+})
+
+```
+### http响应练习
+
+**注意事项：**
+1. 运行：当端口被占用，关闭其它运行9000端口的终端，或者修改运行端口号。
+2. 在浏览器输入此url进行请求查看效果：
+- [点击跳转浏览器进行测试](http://localhost:9000)
+
+代码示例：res.pratice.html + res_pratice.js
+```javascript
+/** http响应练习
+ * 需求
+ * 搭建http服务，响应一个4行3列的表格
+ * 并且要求表格有 隔行换色效果，且点击单元格能高亮显示
+ */
+const fs = require('fs');
+const http = require('http');
+const server = http.createServer((req, res) => {
+    res.setHeader('content-type', 'text/html;charset=UTF-8');
+    const html = fs.readFileSync(__dirname+'/res_pratice.html');
+    res.end(html);
+});
+server.listen(9000, () => {
+    console.log('Server started on port 9000,');
+    console.log('http://localhost:9000/');
+})
+
+```
+### 网页资源加载的全部过程
