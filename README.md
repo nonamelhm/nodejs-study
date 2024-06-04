@@ -554,3 +554,108 @@ fs.rmSync('./test', {recursive: true});
 
 ```
 ### 查看资源状态
+* 异步查看语法：fs.`stat`(path[,option],callback)
+* 同步查看语法： fs.`statSync`(path[,option])
+
+参数说明：
+* path 文件路径
+* options 选项配置（可选）
+* callback 操作后的回调
+
+示例代码：fs_stat.js
+```javascript
+/**  查看资源状态
+ *  fs.stat()
+ */
+const fs = require('fs');
+// 异步获取状态
+fs.stat('./info.txt', (err, data) => {
+    if(err){
+        console.log('查看资源失败：')
+        console.log(err);
+        return;
+    }
+    console.log('异步查看资源成功！详细信息如下：')
+    console.log(data);
+    //判断是否是一个文件方法 isFile()
+    console.log('是文件吗？')
+    console.log(data.isFile());
+    // 判断是否是一个文件夹方法 isDirectory()
+    console.log("是文件夹吗？")
+    console.log(data.isDirectory());
+})
+// 同步获取状态
+const data = fs.statSync('./info.txt');
+console.log('同步查看资源成功！详细信息如下：')
+console.log(data);
+```
+结果值对象结构：
+* size 文件体积
+* birthtime 创建时间
+* mtime 最后修改时间
+* isFile 检测是否为文件
+* isDirectory 检测是否为文件夹
+* ...
+
+### 路径补充说明
+> 路径分为`相对路径`和`绝对路径`两种写法
+
+#### 相对路径
+比如在当前根目录的info.txt
+* 相对路径表达为`./info.txt`
+#### 相对路径常遇到的bug与解决
+> 相对路径参照的是命名行的工作目录！
+
+**Bug:**
+
+比如在 代码利用`相对路径创建文件./info.txt`：
+- 在当前命令运行`node fs_writeFile.js`就在当前文件夹生成info.txt
+- 在nodejs上层运行`node ./nodejs/fs_writeFile.js`就会在nodejs同级生成info.txt
+
+结论：
+- 相对路径的参照物 是在运行命令行的当前目录
+
+**解决方法**
+* 利用绝对路径：使用全局变量`__dirname`进行拼接：保存的是所在文件的所在目录的`绝对路径`
+
+代码示例：
+```javascript
+//使用绝对路径：__dirname拼接方式 
+//利用绝对路径：使用全局变量`__dirname`进行拼接：保存的是所在文件的所在目录的`绝对路径`
+fs.writeFileSync(__dirname+'/index.html','写入内容哈哈哈哈')
+```
+#### 绝对路径
+> 常会遇到权限的问题
+
+比如在D盘下的info.txt
+* 绝对路径表达为`D:/info.txt`
+* linux操作系统下用的较多`/`开头，比如`/info.txt`
+
+## fs练习_批量重命名
+优化如下：
+* 视频用的是split会拆分，这里我用的是正则表达式
+* 视频用的是相对路径，这里我拼接了`__dirname`使用了绝对路径
+
+**示例代码：**
+```javascript
+/** 批量重命名
+ * 需求：将code文件夹里面的文件
+ * 名称为前面为1-9的命名为01-09
+ */
+// 思路
+// 1-读取readdirSync里面的文件名称  fs.readdirSync(path,callback)
+// 2-重命名renameSync fs.renameSync(path,callback)
+const fs = require('fs');
+const files = fs.readdirSync(__dirname + '/code');
+console.log('名称为：');
+console.log(files);
+// 读取文件修改
+files.forEach(file => {
+    const oldPath = __dirname + '/code/' + file;
+    // 利用正则表达式_前面是一位数的补0
+    const newFileName = file.replace(/^(\d)_(.+)$/i, "0$1_$2");
+    const newPath = __dirname + '/code/' + newFileName;
+    //重命名
+    fs.renameSync(oldPath, newPath);
+})
+```
