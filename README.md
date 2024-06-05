@@ -1196,3 +1196,274 @@ server.listen(9000, () => {
 
 ```
 ### 网页资源加载的全部过程
+* 1-先加载html
+* 2-再根据html内容加载css、图片资源、js等
+
+* 3-favicon.icon请求：浏览器默认行为：默认请求网站图标favicon.icon
+* 4-ws请求：插件行为，使得网页实现自动刷新功能
+
+### 实现网页引入外部资源
+> 接回之前的响应练习，现在需求是将css js分离开，单独引入资源
+
+代码示例: res_pratice.js => 读取res_practice.html res_pratice.css  pratice_click.js
+```javascript
+/** http响应练习
+ * 需求
+ * 搭建http服务，响应一个4行3列的表格
+ * 并且要求表格有 隔行换色效果，且点击单元格能高亮显示
+ */
+const fs = require('fs');
+const http = require('http');
+const server = http.createServer((req, res) => {
+    //按路径区分 请求资源 进行 响应。不要都响应此html
+    const {pathname} = new URL(req.url, 'http://127.0.0.1')
+    if (pathname === '/') {
+        //注意：此响应头得在html里，否则可能会没效果
+        res.setHeader('content-type', 'text/html;charset=UTF-8');
+        const html = fs.readFileSync(__dirname + '/res_pratice.html');
+        res.end(html);
+    } else if (pathname === '/res_pratice.css') {
+        const css = fs.readFileSync(__dirname + '/res_pratice.css');
+        res.end(css);
+    } else if (pathname === '/pratice_click.js') {
+        const js = fs.readFileSync(__dirname + '/pratice_click.js');
+        res.end(js);
+    } else {
+        res.end('<h1>404 Not Found!</h1>');
+    }
+
+});
+server.listen(9000, () => {
+    console.log('Server started on port 9000,');
+    console.log('http://localhost:9000/');
+})
+
+```
+### 静态资源与动态资源
+* 静态资源：内容长时间不发生改变的资源，例如图片，视频，css文件，js文件，HTML文件，字体文件等
+* 动态资源：内容经常更新的资源，例如百度首页，网易首页，京东搜索列表页面等。
+
+### 搭建静态资源服务
+对响应式练习的优化处理
+* 利用`__dirname+pathname`进行拼接,无需多次请求
+
+代码示例：
+```javascript
+/** http响应练习
+ * 需求
+ * 搭建http服务，响应一个4行3列的表格
+ * 并且要求表格有 隔行换色效果，且点击单元格能高亮显示
+ */
+const fs = require('fs');
+const http = require('http');
+const server = http.createServer((req, res) => {
+    //按路径区分 请求资源 进行 响应。不要都响应此html
+    // const {pathname} = new URL(req.url, 'http://127.0.0.1')
+    // if (pathname === '/') {
+    //     //注意：此响应头得在html里，否则可能会没效果
+    //     res.setHeader('content-type', 'text/html;charset=UTF-8');
+    //     const html = fs.readFileSync(__dirname + '/res_pratice.html');
+    //     res.end(html);
+    // } else if (pathname === '/res_pratice.css') {
+    //     const css = fs.readFileSync(__dirname + '/res_pratice.css');
+    //     res.end(css);
+    // } else if (pathname === '/pratice_click.js') {
+    //     const js = fs.readFileSync(__dirname + '/pratice_click.js');
+    //     res.end(js);
+    // } else {
+    //     res.end('<h1>404 Not Found!</h1>');
+    // }
+    // 优化
+    const {pathname} = new URL(req.url, 'http://127.0.0.1')
+    const filename = pathname === '/' ? __dirname + '/res_pratice.html' : __dirname + pathname;
+    fs.readFile(filename, 'utf8', (err, data) => {
+        if (err) {
+            res.end('<h1>404 Not Found!</h1>');
+            console.error(err);
+            return;
+        }
+        res.end(data);
+    })
+});
+server.listen(9000, () => {
+    console.log('Server started on port 9000,');
+    console.log('http://localhost:9000/');
+})
+
+```
+### 网页URL之绝对路径
+绝对路径可靠性强，而且相对性容易理解，在项目中运用较多
+
+
+| 形式                   | 特点                                   | 
+  |----------------------|--------------------------------------|
+| http://www.baidu.com | 直接向目标资源发送请求，容易理解。网站的外链会用到此形式。        |
+| //www.baidu.com      | 与页面URL的协议拼接形成完整URL再发送请求。大型网站用的比较多    | 
+| /web                 | 与页面URL的协议、主机名、端口拼接形成完整URL再发送请求。中小型网站 | 
+
+### 网页URL之相对路径
+相对路径在发送请求时，需要与当前页面URL路径进行计算，得到完整URL后，再发送请求，学习阶段用的较多。
+例如当前网页url为：http://www.atguigu.com/course/h5.html
+
+| 形式              | 最终的URL                                    | 
+  |-----------------|-------------------------------------------|
+| ./css/app.css   | http://www.atguigu.com/course/css/app.css |
+| js/app/js       | http://www.atguigu.com/course/js/app.js   | 
+| ../img/logo.png | http://www.atguigu.com/img/logo.png       | 
+| ../mp4/show.mp4 | http://www.atguigu.com/mp4/show.mp4       | 
+ 
+### 网页中使用URL的场景小结
+包括但不限于以下场景：
+* a标签href
+* link标签href
+* script标签src
+* img标签src
+* video audio 标签 src
+* form中的action
+* AJAX请求中的URL
+
+### 设置mime类型
+`媒体类型` 通常称为`Multipurpose Internet Mail Extension` 或 `MIME` 类型）是一种标准，用来表示文档、文件或字节流的性质和格式。
+```text
+mime 类型结构： [type]/[subType]
+例如： text/html images/jpeg  image/png application/json
+```
+HTTP服务可以设置响应头`Content-Type`来表明响应体的MIME类型，浏览器会根据该类型决定如何处理资源
+下面是常见的文件对应的mime类型
+```text
+html: `text/html`
+css:`text/css`
+js:`text/javascript`
+png:`images/png`
+jpg:`images/jpeg`
+gif:`images/gif`
+mp4:`video/mp4`
+mp3:`audio/mpeg`
+json:`application/json`
+```
+> 对于未知的资源类型，可选择`application/actet-stream`类型，浏览器在遇到该类型响应时，会对该响应体类型进行独立存储，也就是我们常见的`下载`效果
+
+代码示例：./http/mime.js
+```javascript
+// 设置mime
+const http = require('http');
+const path = require('path');
+const server = http.createServer((req, res) => {
+    // 优化
+    const {pathname} = new URL(req.url, 'http://127.0.0.1');
+    const filepath = pathname === '/' ? __dirname + '/res_pratice.html' : __dirname + pathname;
+    // 得到后缀名
+    const extname = path.extname(filepath).slice(1);
+    // 根据请求文件后缀名，设置相应的mime
+    let mimes = {
+        html: 'text/html',
+        css: "text/css",
+        js: 'text/javascript',
+        png: 'images/png',
+        jpg: 'images/jpeg',
+        gif: 'images/gif',
+        mp4: 'video/mp4',
+        mp3: 'audio/mp3',
+        json: 'application/json'
+    }
+    // 获取对应类型
+    const type = mimes[extname];
+    // 判断
+    if (type) {
+        //解决乱码问题 
+        if(extname==='html'){
+          res.setHeader('Content-Type', type+';charset=utf-8');
+        }else{
+          res.setHeader('Content-Type', type);
+        }
+    } else {
+        res.setHeader('Content-Type', 'application/actet-stream');
+    }
+    fs.readFile(filepath, 'utf8', (err, data) => {
+        if (err) {
+            res.end('<h1>404 Not Found!</h1>');
+            console.error(err);
+            return;
+        }
+        res.end(data);
+    })
+});
+
+server.listen(9000, () => {
+    console.log('server started');
+    console.log('http://localhost:9000/');
+})
+```
+### 解决乱码问题
+* html添加字符集`charset:utf-8`即可.
+* 响应头的字符集优先于html的meta设置的字符集
+
+代码示例：如上：./http/mime.js
+
+### 完善错误处理
+[点击node.js中文网查看错误代码具体含义](https://nodejs.cn/api/errors.html#nodejs-error-codes)
+
+代码处理示例：error.js
+```javascript
+// 完善错误处理
+const http = require('http');
+const fs = require('fs');
+const server = http.createServer((req, res) => {
+  // 优化
+  const {pathname} = new URL(req.url, 'http://127.0.0.1');
+  const filepath = pathname === '/' ? __dirname + '/res_pratice.html' : __dirname + pathname;
+  fs.readFile(filepath, 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+      switch (err.code) {
+        case 'ENOENT':
+          res.statusCode = 404;
+          res.end('<h1>404 Not Found!</h1>');
+        case 'EPERM':
+          res.statusCode = 403;
+          res.end('<h1>403 Forbidden!</h1>');
+        default:
+          res.statusCode = 500;
+          res.end('<h1>Internal Server Error</h1>');
+      }
+      return;
+    }
+    res.end(data);
+  })
+});
+
+server.listen(9000, () => {
+  console.log('server started');
+  console.log('http://localhost:9000/');
+})
+
+```
+### GET和POST使用场景
+GET请求场景：
+* 在地址栏直接输入url访问
+* 点击a链接
+* link标签引入css
+* script标签引入js
+* video与audio引入多媒体
+* img标签引入图片
+* form标签中的method为get
+
+POST请求中的请求
+* form标签中的method为post
+* AJAX中的post请求
+
+### GET和POST请求区别
+GET和POST是HTTP协议请求中的两种方式，主要有以下区别：
+1. 作用：GET主要是用来获取数据，POST主要是用来提交数据
+2. 参数位置：GET主要用来获取数据，POST主要用来提交数据
+3. 安全性：POST请求相对GET安全一些，因为在浏览器中会暴露在地址栏
+4. GET请求大小有限制，一般为2k,而POST请求则没有大小限制
+
+
+
+
+
+
+
+
+
