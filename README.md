@@ -1459,6 +1459,117 @@ GET和POST是HTTP协议请求中的两种方式，主要有以下区别：
 3. 安全性：POST请求相对GET安全一些，因为在浏览器中会暴露在地址栏
 4. GET请求大小有限制，一般为2k,而POST请求则没有大小限制
 
+## 模块化
+### 什么是模块化
+> 将一个复杂的程序文件依据一定规则（规范）拆分成多个文件的过程称之为模块化
+> 其中拆分出的每个文件就是一个模块。模块内部的数据是私有的，不过模块可以暴露内部数据以使其它模块使用
+
+**模块化项目：**
+编码时按照模块一个个编码的，整个项目就是一个模块化的项目
+
+**模块化好处：**
+1. 防止命名冲突
+2. 高复用性
+3. 高维护性
+
+### 模块化初体验
+* Commonjs规范
+
+代码示例：me.js
+```javascript
+// 声明函数
+function tiemo(){
+    console.log('timemo')
+}
+module.exports = tiemo;
+
+```
+代码示例：index.js
+```javascript
+//引入模块
+const tiemo = require('./me');
+// 调用
+tiemo();
+
+```
+运行：
+* ./module/index.js 是相对于当前打开终端的目录路径，根据自己路径找到index.js
+```shell
+node ./module/index.js
+```
+### 模块暴露数据
+* 方式1：module.exports = value
+* 方式2：module.exports = {value1,value2}
+* 方式3：export.name = value
+
+📢注意：不要直接exports = value ❎ 错误写法
+
+代码示例： me.js
+```javascript
+// 声明函数
+function tiemo() {
+    console.log('timemo')
+}
+
+function niejiao() {
+    console.log('niejiao');
+}
+
+// 暴露数据
+// module.exports = tiemo;
+// 暴露数据2
+module.exports = {
+    tiemo,
+    niejiao
+}
+// 暴露数据3
+// exports.niejiao = niejiao;
+// exports.tiemo = tiemo;
+
+
+// 注意：不能使用 exports=value的形式暴露数据
+// 因为如下相等
+// exports = module.exports = {tiemo: tiemo}
+// exports.tiemo = tiemo;
+
+```
+
+代码示例：index.js 调用
+```javascript
+//引入模块
+const me = require('./me');
+// 调用
+me.tiemo();
+me.niejiao();
+```
+### 导入模块
+在模块中使用`require`传入文件路径即可使用文件
+```javascript
+const test = require('./me.js');
+```
+**`require`使用的一些注意事项**
+1. 对于自己创建的模块，导入时路径建议写相对路径，不能省略`./`和`../`
+2. js和json文件导入时可以不用写后缀，c/c++编写的node扩展文件也可不写后缀，但一般用不到
+3. 如果导入其他类型的文件，会以js文件进行处理
+4. 如果导入路径为文件夹，首先会检测`package.json`文件中main属性对应的文件，如果main属性不存在，或者package.json不存在，则会检测文件夹下的index.js和index.json.如果还是没找到，就会报错
+5. 导入node.js内置模块时，直接require模块的名字即可，无需加`./`和`../`
+
+> Node.js实现了CommonJS模块化规范
+
+### 导入模块的基本流程
+介绍`require`导入自定义模块的基本流程
+1. 将相对路径转为绝对路径，定位目标文件
+2. 缓存检测
+3. 读取目标文件代码
+4. 包裹为一个函数并执行（自执行函数）。通过`arguments.callee.toString()`查看自执行函数
+5. 缓存模块的值
+6. 返回module.exports值
+
+### CommonJS规范
+* `module.exports` `exports` 以及`require` 这些都是CommonJS模块化规范中的内容
+* Node.js是实现了CommonJS模块化规范，二者关系有点像JavaScript与ECMAScript
+
+
 
 
 
