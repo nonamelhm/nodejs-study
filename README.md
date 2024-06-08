@@ -1878,3 +1878,38 @@ npm unpublish --force
 | nvm install latest    | 安装最新版本的Node.js      |
 | nvm uninstall 18.12.1 | 删除18.12.1版本的Node.js |
 | nvm use 18.12.1       | 切换18.12.1的Node.js   |
+
+## express
+### express介绍
+> 官网介绍：expresss是一个基于Node.js平台的极简、灵活的WEB应用开发框架。[官网网址](https://www.express.com.cn/).简单来说，express是一个封装好的工具包，封装了很多功能，便于我们开发WEB应用。（HTTP服务）
+> http模块帮助我们搭建http服务，给浏览器做出相应服务端的功能，直接使用还是不太方面，于是我们借助express框架.
+
+### express路由
+> 路由确定了应用程序如何响应客户对特定端点的请求
+
+#### 路由基本使用
+一个路由有请求方法、路径和回调函数组成
+express中提供了一系列方法，可以很方便的使用路由 使用格式如下：
+```text
+app.<method>(path,callback)
+```
+
+代码示例：startlearn.js
+```javascript
+// 初认识express
+// 引入模块
+const express = require('express');
+// 创建应用对象
+const app = express();
+const port = 3000;
+// 创建路由
+app.get('/home', (req, res) => {
+  res.end('hello world');
+})
+//监听端口 启动服务
+app.listen(port, () => {
+  console.log('Express server started');
+  console.log('http://localhost:9000/');
+})
+
+```
