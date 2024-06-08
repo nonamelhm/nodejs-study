@@ -1655,8 +1655,226 @@ nodemon ./fs/fs_writeFile.js
 ```shell
 npm i
 ```
+###  npm安装指定版本的包
+* 语法：`npm i <包名@版本包>`
+示例：
+```shell
+npm i jquery@1.11.2
+```
+### npm删除包
+* `npm remove `  /  `npm r`
+* `npm uninstall`  / `npm uni`
+全局删除示例：
+````shell
+npm remove -g modemon
+````
+局部删除示例：
+```shell
+npm remove uniq
+```
+```shell
+npm uninstall juery
+```
+### npm命令配置别名
+1. 通过package.json中配置script
+> * npm start 是项目中常用命令，用来启动命令。可不加 run
+> * npm run 有自动向上级目录查找的特性，跟require函数一样默认
+> * 对于陌生项目，我们可以先通过查看scripts属性来参考项目的一些操作。可看到怎么运行项目、打包项目等
 
 
+示例如：（配置了start启动命令）
+```json
+{
+  "name": "test",
+  "version": "1.0.0",
+  "description": "学习npm",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./test.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "uniq": "^1.0.1"
+  }
+}
+```
+2.运行
+```shell
+npm run start
+```
+### cnpm
+#### 介绍
+* cnpm淘宝搭建的`npmjs.com`的完整镜像，也称为【淘宝镜像】，[网址](https://npmmirror.com/)
+* cnpm服务部署在国内`阿里云服务器上`，可以提高的下载速度
+* 官网也提供了一个全局工具包`cnpm`,操作命令与npm大体相同
 
+#### 安装
+```shell
+npm install -g cnpm --registry=https://registry.npmmirror.com
+```
+#### 操作命令
+* 基本跟npm相同
 
+| 功能     | 命令                                                                      |
+|--------|-------------------------------------------------------------------------|
+| 初始化    | cnpm init                                                               |
+| 安装包    | cnpm i uniq<br/>cnpm i -S uniq<br/>cnpm i -D uniq<br/>cnpm i -g nodemon |
+| 安装项目依赖 | cnpm i                                                                  |
+| 删除     | cnpm r uniq<br/>cnpm uni uniq                                           |
 
+### 配置淘宝镜像
+用npm可直接下载淘宝镜像，配置方式有两种
+* 直接配置
+* 工具配置
+#### 直接配置
+```shell
+npm config set registry https://registry.npmmirror.com/
+```
+#### 工具配置
+1. 安装nrm
+```shell
+npm i -g nrm
+```
+2. 修改镜像
+```shell
+nrm use taobao
+```
+3. 检查是否配置成功
+```shell
+npm config list
+```
+PS:  检查registry地址是否为https://reggistry/npmmirror.com/ 如果是则表明成功
+> 补充说明:
+> 1. 建议使用第二种方式进行镜像配置，因为后续修改起来会比较方便
+> 2. 虽然cnpm可以提高速度，但是npm也可以通过淘宝镜像进行加速，所以npm使用率还是高于cnpm
+### yarn
+#### 介绍
+> yarn是Facebook在2016年推出的JavaScript推出的包管理工具 [官网网址](https://yarnpkg.com/)
+
+**特点**
+* 速度超快:yam 缓存了每个下载过的包，所以再次使用时无需重复下载。 同时利用并行下载以最大化资源利用率，因此安装速度更快
+* 超级安全:在执行代码之前，yarn 会通过算法校验每个安装包的完整性
+* 超级可靠:使用详细、简洁的锁文件格式和明确的安装算法，yarn 能够保证在不同系统上无差异的工作
+#### 安装
+```shell
+npm i -g yarn
+```
+#### yarn常用命令
+
+| 功能     | 命令                                                                               |
+|--------|----------------------------------------------------------------------------------|
+| 初始化    | yarn init  /  yarn init -y                                                       |
+| 安装包    | yarn add uniq 生产依赖<br/>yarn add less --dev 开发依赖<br/>yarn global add nodemon 全局安装 |
+| 安装项目依赖 | yarn                                                                        |
+| 删除     | yarn remove uniq 删除项目依赖包<br/>yarn global remove nodemon  全局删除包        |
+| 运行命令别名 | yarn <别名>                                                                 |
+
+###  npm 和 yarn 选择
+大家可以根据不同场景进行选择
+1. 个人项目，根据个人喜好选择
+2. 公司项目：根据项目代码选择，可以选择通过锁文件判断项目的包管理工具
+  - npm 锁文件是 package-lock.json
+  - yarn 锁文件是 yarn.lock
+> 包管理工具不要混用，切记，切记，切记
+
+### npm发布一个包
+#### 创建与发布
+> 将自己开发的工具包发布到npm服务上，方便自己和其它开发者进行使用，操作步骤如下：
+1. 创建文件夹，并创建文件main中index.js入口文件，在文件中声明删除，使用module.exports暴露
+
+代码示例：
+```javascript
+function add(a, b) {
+    return a + b;
+}
+
+module.exports = {
+    add
+}
+```
+2. npm初始化工具包`npm init`，package.json填写包的信息（包名必须唯一）
+3. [注册账号](https://www.npmjs.com/registry)
+4. 激活账号（一定要激活账号）
+5. 修改为官方镜像
+* 之前使用了别的镜像，比如淘宝镜像加速，不切回官方镜像很可能会上传失败.
+  - 通过nrm方式切回官方镜像：
+
+     **没安装的先安装：**
+     ```shell
+     npm i -g nrm
+     ```
+     **切回官方镜像:**
+     ```shell
+     nrm use npm
+     ```
+6. 登录npm,按照要求登录
+```shell
+npm login
+```
+7. 提交发布包
+```shell
+npm publish
+```
+### 更新包
+1. 更新包中代码
+2. 测试代码是否可用
+3. 修改package.json中版本号
+4. 发布更新
+```shell
+npm publish
+```
+### 删除包
+```shell
+npm unpublish
+```
+不成功加上`--force`强制删除
+```shell
+npm unpublish --force
+```
+删除包需要一定条件，[查看条件](https://docs.npmjs.com/policies/unpublish)
+* 你是包作者
+* 发布小于24小时
+* 大于24小时后，没有其他包依赖，并且每周小于300下载量，并且只有一个维护者
+
+### 包管理工具扩展介绍
+> 很多语言都有包管理工具。除了编程语言，操作系统层面也存在包管理工具。
+
+| 语言         | 包管理工具               |
+|------------|---------------------|
+| PHP        | composer            |
+| Python     | pip                 |
+| Java       | maven               |
+| Go         | go mod              |
+| JavaScript | npm/yarn/cnpm/other |
+| Ruby       | rubyGems            |
+
+操作系统也存在包管理工具，不过这个包指的是软件包:
+
+| 操作系统       | 包管理工具         | 网址  |
+|------------|---------------------|---------|
+| Centos     | composer            |  https://package.debian.org/stabel/ |
+| Ubuntu    | apt                 |https://package.ubuntu.com /|
+| MacOS       |homeview               |https://brew.sh /|
+| Windows         | chocolatey             |https://chocolatey.org |
+
+### nvm介绍与使用
+#### 介绍
+> nvm 全称 Node Version Manager 顾名思义用来管理node版本工具。方便切换不用版本的Node.js。一般项目中，新旧项目要求的node版本不同，建议使用nvm安装node.js,方便切换
+#### 下载安装
+> 安装太久，不知道哪个博文好使了，可以去网上寻找细致教程
+
+* [windows的github下载地址](https://github.com/coreybutler/nvm-windoes/releases.)
+* 选择 `nvm-setup.exe` 下载即可
+
+#### 常用命令
+
+| 命令                    | 说明                  |
+|-----------------------|---------------------|
+| nvm use available     | 显示可下载的Node.js版本     |
+| nvm list              | 显示已安装的版本            |
+| nvm install 18.12.1   | 安装18.12.1版本的Node.js |
+| nvm install latest    | 安装最新版本的Node.js      |
+| nvm uninstall 18.12.1 | 删除18.12.1版本的Node.js |
+| nvm use 18.12.1       | 切换18.12.1的Node.js   |
