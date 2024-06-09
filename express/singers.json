@@ -1,0 +1,19 @@
+{
+  "singers": [
+    {
+      "singer_name": "周杰伦",
+      "other_name": " Jay chou",
+      "id": 1
+    },
+    {
+      "singer_name": "林俊杰",
+      "other_name": " JJ Lin",
+      "id": 2
+    },
+    {
+      "singer_name": "邓紫棋",
+      "other_name": "Gloria Tang",
+      "id": 3
+    }
+  ]
+}

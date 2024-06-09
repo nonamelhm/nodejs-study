@@ -1885,7 +1885,9 @@ npm unpublish --force
 > http模块帮助我们搭建http服务，给浏览器做出相应服务端的功能，直接使用还是不太方面，于是我们借助express框架.
 
 ### express路由
-> 路由确定了应用程序如何响应客户对特定端点的请求
+> 路由确定了应用程序如何响应客户对特定端点的请求。
+* express依旧兼容之前的http的获取请求及其响应方法！
+
 
 #### 路由基本使用
 一个路由有请求方法、路径和回调函数组成
@@ -1893,6 +1895,8 @@ express中提供了一系列方法，可以很方便的使用路由 使用格式
 ```text
 app.<method>(path,callback)
 ```
+
+PS:代码中1-4方法使用，知识点
 
 代码示例：startlearn.js
 ```javascript
@@ -1902,10 +1906,26 @@ const express = require('express');
 // 创建应用对象
 const app = express();
 const port = 3000;
-// 创建路由
+// 1-创建路由 get方法
 app.get('/home', (req, res) => {
   res.end('hello world');
 })
+
+// 2-创建路由 get方法
+app.post('/login', (req, res) => {
+  res.end('hello login');
+})
+
+//3- 无论get或post方法
+app.all('/test', (req, res) => {
+  res.end('no matter methods');
+})
+
+//4-上面匹配不上的路由规则
+app.all('*', (req, res) => {
+  res.end('404 No Found');
+})
+
 //监听端口 启动服务
 app.listen(port, () => {
   console.log('Express server started');
@@ -1913,3 +1933,600 @@ app.listen(port, () => {
 })
 
 ```
+### 获取请求报文参数
+
+| 说明         | 原生http获取                                                                                                                  | express框架获取     |
+|------------|---------------------------------------------------------------------------------------------------------------------------|-----------------|
+| 获取请求路径path | const url = require('url'); <br/>url.parse(request.url).pathname; /<br/> new URL(req.url,'http://localhost:9000').pathname | req.path        |
+| 获取请求参数     | const url = require('url'); url.parse(request.url,true).query;                                                            | req.query       |
+| 获取ip       | req.connection.remoteAddress                                                                                              | req.ip          |
+| 获取请求头      | req.headers['host']                                                                                                       | req.get('host') |
+
+### 获取路由参数
+* 语法eg=》路径`/:id` 通过`req.params.id`获取路由参数
+
+代码示例：
+```html
+const express = require('express');
+const app = express();
+//通配符  通过http://localhost:3000/login/1212121访问即可知
+app.get('/login/:id', (req, res) => {
+// 获取id
+console.log(req.params.id);
+res.end('login success!');
+})
+app.get('/', (req, res) => {
+res.end('hello');
+})
+//监听端口 启动服务
+app.listen(3000, () => {
+console.log('Express server started');
+console.log('http://localhost:3000');
+})
+```
+### 路由参数练习
+
+[运行后点击测试](http://localhost:3000/singer/2)
+代码示例如下：singer.json + params_pratice.js
+```javascript
+/** 需求
+ * 通过路由id返回歌手名称及其它名称
+ */
+const express = require('express');
+const app = express();
+const fs = require('fs');
+// 读取歌手假数据json文件
+const singersData = fs.readFileSync(__dirname + '/singers.json').toString();
+app.get('/singer/:id', (req, res) => {
+  const {id} = req.params;
+  const matchData = JSON.parse(singersData).singers.find(item => item.id === Number(id));
+  res.setHeader('content-type', 'text/html; charset=utf-8');
+  if (matchData) {
+    res.end(`名称：${matchData.singer_name},其它名称:${matchData.other_name}`);
+  } else {
+    res.end('No Such a Singer');
+  }
+})
+
+app.listen(3000, () => {
+  console.log('Express server started');
+  console.log('http://localhost:3000');
+})
+
+```
+### 一般响应设置
+* 设置响应状态码：res.status(200)
+* 设置请求头：res.set('asas','aaa')
+* 设置响应内容： res.send('你好')
+* 连贯操作：res.status(200).set('hahaha~', 'hhh').send('你好 express');
+
+代码示例如下：
+```javascript
+const express = require('express');
+const app = express();
+app.get('/', (req, res) => {
+//     //原生响应也兼容
+//     res.statusCode = 200;
+//     res.statusMessage = 'asasa';
+//     res.setHeader('hahha', 'hhh');
+//     res.write('hello world!');
+//     res.end('res content');
+
+// express设置状态码
+// res.status(200);
+// // express设置请求头
+// res.setset('hahaha~', 'hhh');
+// // express响应内容 做了封装 中文不乱码
+// res.send('你好');
+
+// 连贯操作
+  res.status(200).set('hahaha~', 'hhh').send('你好 express');
+})
+
+app.listen(3000, () => {
+  console.log('server started on port 3000');
+  console.log('http://localhost:3000');
+});
+
+```
+### 其它响应设置
+* 设置重定向：res.redirect('http://www.baidu.com')
+* 下载响应：res.download('路径')
+* 响应json: res.json({内容)
+* 响应文件内容：res.sendFile(__dirname+'/home.html')
+
+```javascript
+// 其它响应
+app.get('/other', (req, res) => {
+    //1-设置重定向
+    // res.redirect('http://www.baidu.com');
+    // 2-下载响应
+    // res.download(__dirname + '/singers.json');
+    // 3-响应json
+    // res.json({
+    //     "singer_name": "林俊杰",
+    //     "other_name": " JJ Lin",
+    //     "id": 2
+    // });
+    //4-响应文件内容
+    res.sendFile(__dirname + '/test.html');
+})
+```
+### 中间件
+#### 中间件介绍
+* 本质是一个回调函数
+* 可以像回调喊出一样访问 请求对象，响应对象
+#### 中间件作用
+* 中间件作用就是使用函数封装公共操作，简化代码
+### 中间件类型
+* 全局中间件
+* 路由中间件
+#### 全局中间价
+* 每一个请求到达服务端之后都会执行全局中间件代码
+
+代码示例：middleware.js
+```javascript
+// 认识中间件
+/** 需求
+ * 追加日志记录，写入log.txt文件
+ */
+const express = require('express');
+const app = express();
+const fs = require('fs');
+const path = require('path');
+
+// 全局中间件
+// 定义
+function recordMiddleWare(req, res, next) {
+  // 判断是否有文件 没有就创建
+  const filePath = path.resolve(__dirname, './log.txt');
+  //  判断文件是否存在，如果不存在就创建一个空文件
+  if (!fs.existsSync(filePath)) {
+    fs.writeFileSync(filePath, '');
+  }
+  // 获取url和ip地址
+  const {url, ip} = req;
+  // 每个请求过来的路由信息都保存到日志记录文件
+  fs.appendFileSync(path.resolve(__dirname, `./log.txt`), `${url}    ${ip}\r\n`);
+  // 调用next
+  next();
+}
+
+// 调用中间件函数
+app.use(recordMiddleWare);
+
+app.get('/login', (req, res) => {
+  res.send('login success!');
+})
+
+app.listen(3000, () => {
+  console.log('server started at port 3000');
+  console.log('http://localhost:3000');
+})
+
+```
+#### 路由中间件实践
+* [运行点击测试1](http://localhost:3000/setting?code=521)
+* [运行点击测试2](http://localhost:3000/admin?code=521)
+* [运行点击测试3](http://localhost:3000/registry)
+
+代码示例：middleware_pratice.js
+```javascript
+// 中间件实践
+/** 需求
+ *  针对/admin /setting的请求，要求URL携带code=521参数，如未携带提示【暗号错误】
+ */
+const express = require('express');
+const app = express();
+
+// 定义中间件
+function checkCodeMiddleWare(req, res, next) {
+  // 获取code
+  const {code} = req.query;
+  if (Number(code) === 521) {
+    next();
+  } else {
+    next("【暗号错误】");
+  }
+}
+
+
+//调用中间件
+app.get('/admin', checkCodeMiddleWare, (req, res) => {
+  res.send('admin success!');
+})
+//调用中间件
+app.get('/setting', checkCodeMiddleWare, (req, res) => {
+  res.send('setting success!');
+})
+app.get('/registry', (req, res) => {
+  res.send('registry success!');
+})
+app.get('*', (req, res) => {
+  res.send('<h1>404 Not Found</h1>');
+})
+app.listen(3000, () => {
+  console.log('server started at port 3000');
+  console.log('http://localhost:3000');
+})
+
+```
+#### 静态资源中间件
+1. 根目录下新建public文件夹=》新建index.html文件+新建index.css文件
+2. 代码如下：
+```javascript
+//静态资源中间件请求
+app.use(express.static(__dirname + '/public'));
+```
+3. 运行代码 staticMiddleware.js,下面路径express/staticMiddleware.js为自己运行的文件路径
+```shell
+node express/staticMiddleware.js
+```
+4. 验证
+- [默认打开index.html](http://localhost:3000/)
+- [可直接查看css文件](http://localhost:3000/index.css)
+
+完整代码示例：
+```javascript
+// 静态资源中间件
+const express = require('express');
+const app = express();
+//静态资源中间件请求
+app.use(express.static(__dirname + '/public'));
+
+// 监听端口 启动服务
+app.listen(3000, () => {
+  console.log("Server running on port 3000");
+  console.log('http://localhost:3000');
+})
+```
+**静态资源中间件注意事项**
+1. index.html为默认打开的资源
+2. 静态文件与路由规则app.get('/',()=>{})同时匹配，谁先匹配谁就响应，看代码顺序
+3. 路由响应动态资源，静态资源中间件响应静态资源
+
+### 获取请求体数据body-parser
+1. 安装
+```shell
+npm i body-parser
+```
+2. 获取中间件函数
+* 处理queryString格式的请求体:const urlParser = bodyParser.urlencoded({extended: false});
+* 处理json格式的请求体:const jsonParser = bodyParser.json();
+```javascript
+// 获取中间件函数
+//处理queryString格式的请求体
+const urlParser = bodyParser.urlencoded({extended: false});
+//处理json格式的请求体
+const jsonParser = bodyParser.json();
+```
+3. 使用中间件
+```javascript
+//获取请求体数据
+app.post('/login', urlParser, (req, res) => {
+    // 获取请求体数据
+    console.log(req.body);
+    res.send('用户名:' + req.body.username + '<br/>密码:' + req.body.password);
+})
+```
+完整代码示例：bodyParser.js
+```javascript
+// body-parse获取请求体
+const express = require('express');
+const bodyParser = require('body-parser');
+const app = express();
+// 获取中间件函数
+//处理queryString格式的请求体
+const urlParser = bodyParser.urlencoded({extended: false});
+//处理json格式的请求体
+const jsonParser = bodyParser.json();
+
+//响应login页面
+app.get('/login', urlParser, (req, res) => {
+  res.sendFile(__dirname + '/login.html');
+})
+//获取请求体数据
+app.post('/login', urlParser, (req, res) => {
+  // 获取请求体数据
+  console.log(req.body);
+  res.send('用户名:' + req.body.username + '<br/>密码:' + req.body.password);
+})
+app.listen(3000, () => {
+  console.log('Express server started');
+  console.log('http://localhost:3000');
+})
+
+```
+### 防盗链
+#### 介绍
+> 比如有的图片，直接复制地址显示到img是拿不到的，说明这个网站做了防盗链处理。判断源是请求头里的`referer`参数会携带当前域名和协议及其端口进行请求。
+#### 实践
+完整代码示例：
+1. referer.js
+```javascript
+const express = require('express');
+const app = express();
+// 定义全局防盗链中间件 判断请求头referer
+app.use((req, res, next) => {
+  const referer = req.get('referer');
+  if (referer) {
+    // 实例化
+    const url = new URL(referer);
+    const hostname = url.hostname;
+    console.log(hostname);
+    if (hostname !== '127.0.0.1') {
+      res.status(404).send('<h1>404 Not Found</h1>');
+      return;
+    }
+  }
+  next();
+})
+// 读取静态资源
+app.use(express.static(__dirname + '/public'));
+
+app.listen(3000, () => {
+  console.log('Express server listening on port 3000');
+  console.log('http://localhost:3000');
+})
+
+```
+2. public=>index.html
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>测试！！</h1>
+<img src="http://127.0.0.1:3000/images/logo.jpeg" alt="logo">
+</body>
+</html>
+
+```
+### 路由模块化(***)
+> 路由功能代码进行拆分
+
+1. 新建文件夹routes
+2. 新建homeRouter.js
+3. 创建单独的路由规则
+
+- routermodule.js
+**代码示例：**
+```javascript
+const express = require("express");
+const userRouter = require(__dirname + "/routes/userRouter.js");
+const adminRouter = require(__dirname + "/routes/adminRouter.js");
+const app = express();
+
+app.use(userRouter);
+app.use(adminRouter);
+
+app.all("*", function (req, res) {
+  res.send('404 Not Found');
+})
+
+app.listen(3000, () => {
+  console.log("server started");
+  console.log('http://localhost:3000');
+})
+
+```
+- userRouter.js
+```javascript
+// user routes
+const express = require('express');
+const router = express.Router();
+router.get('/login', (req, res) => {
+  res.send('login登录');
+})
+router.get('/registry', (req, res) => {
+  res.send('registry注册');
+})
+module.exports = router;
+
+```
+- adminRouter.js
+```javascript
+// admin routes
+const express = require('express');
+const router = express.Router();
+router.get('/setting', (req, res) => {
+  res.send('设置setting');
+})
+router.get('/modify', (req, res) => {
+  res.send('修改setting');
+})
+module.exports = router;
+
+```
+### 模版引擎
+#### 简单介绍
+* 模版引擎是分离用户界面和业务数据的一种技术
+#### ejs
+> 分离HTML和JS的，ejs是一个高效的JavaScript模版引擎。主要了解ejs,现在不多用了。
+
+1. 安装
+```shell
+npm i ejs
+```
+2. 导入ejs
+```javascript
+const ejs = require('ejs');
+```
+3. 使用ejs渲染
+
+- 代码示例：ejs.js
+```javascript
+// ejs初体验
+const express = require('express');
+const ejs = require('ejs');
+const fs = require('fs');
+const path = require('path');
+
+const app = express();
+// 读取静态资源
+app.use(express.static(path.join(__dirname, './public')));
+
+const china = '中国';
+// 读取html文件
+const htmlData = fs.readFileSync(__dirname + '/public/index.html','utf-8').toString();
+//使用ejs渲染
+const result = ejs.render(htmlData, {china: china});
+console.log(result);
+
+```
+- 代码示例：index.html
+* <h2><%= china %></h2>
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>测试！！</h1>
+<img src="http://127.0.0.1:3000/images/logo.jpeg" alt="logo">
+
+<h1>读出来了吗？</h1>
+<h2><%= china %></h2>
+
+</body>
+</html>
+
+```
+### ejs列表渲染
+代码如下：ejs_xiyou.js
+```javascript
+// ejs列表渲染
+/** 需求
+ * 渲染ul li 西游数组
+ */
+
+const ejs = require('ejs');
+const fs = require('fs');
+
+const xiyou = ['唐僧', '孙悟空', '沙僧', '猪八戒'];
+const htmlData = fs.readFileSync(__dirname + '/ejs_xiyou.html').toString()
+
+const result = ejs.render(htmlData, {xiyou: xiyou});
+console.log(result);
+
+```
+代码如下：ejs_xiyou.html
+```html
+<ul>
+    <% xiyou.forEach(item=>{ %>
+    <li> <%= item %></li>
+    <% }) %>
+</ul>
+```
+### ejs条件渲染
+* js如上
+* html如下
+代码示例：
+```html
+<% if(isLogin){ %>
+<span>登录成功</span>
+<% }else{ %>
+<span>登录失败</span>
+<% } %>
+```
+### express中使用ejs
+1. 设置模板引擎
+```javascript
+app.set('view engine', 'ejs');
+```
+2. 设置模板文件存放位置 新建view文件夹=》views新建.ejs文件，比如home.ejs
+```javascript
+app.set('views',path.resolve(__dirname,'./views'))
+```
+3. render响应
+```javascript
+res.render('home',{title})
+```
+4. 创建模版文件 其实就是.ejs文件，但其实就是类html文件,主要得含有如下代码：
+```html
+<%= title %>
+```
+完整代码示例：express_ejs.js
+```javascript
+const express = require("express");
+const ejs = require("ejs");
+const path = require("path");
+const app = express();
+// 1-设置模版引擎
+app.set("view engine", "ejs");
+// 2-设置模版文件存放位置
+app.set("views", path.resolve(__dirname, "./views"));
+
+app.get('/home', (req, res) => {
+  const title = 'Home页面';
+  // 3-render响应
+  res.render("home", {title});
+  // 创建模版文件 home.ejs
+})
+
+app.all('*', (req, res) => {
+  res.send('404 Not Found');
+})
+
+app.listen(3000, () => {
+  console.log("Server is running on port 3000");
+  console.log('http://localhost:3000');
+});
+
+```
+完整代码：views=>home.ejs
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>测试：</h1>
+<h1><%= title %> </h1>
+</body>
+</html>
+
+```
+### express-generator工具
+* 通过应用生成器express-generator快速创建一个应用骨架
+1. 安装
+- npx命令来运行（包含Node.js8.2.0及更高的版本中）
+```shell
+npx express-generator
+```
+- npm方式
+```shell
+npm i -g express-generator
+```
+2. 创建文件夹
+* 语法 express -e <文件夹名称>
+```shell
+express -e generator
+```
+
+**查看相关命令**
+```shell
+express -h
+```
+
+### 查看文件上传报文
+
+
+### 处理文件上传
+
+
+
+
+
+
+
+
+
+
