@@ -1,5 +1,4 @@
 const express = require("express");
-const ejs = require("ejs");
 const path = require("path");
 const app = express();
 // 1-设置模版引擎
