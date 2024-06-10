@@ -2615,13 +2615,166 @@ app.listen(3000, () => {
 });
 
 ```
+## mongoDB
+#### 介绍
+> 基于分布式文件存储的数据库，[官方网址](https://www.mongodb.com/)
 
+**相比于纯文件管理数据，数据库管理数据优点：**
+1. 速度更快
+2. 扩展性更强
+3. 安全性更强
+#### 核心概念
+* 数据库：又称数据仓库，可存放很多集合
+* 集合：类似于JS中的数据，在集合中可以存放很多文档
+* 文档：数据库中的最小单位，类似JS中的对象
 
+#### 下载安装与启动
+[下载地址](https://www.mongodb.com/try/download/community)
+这边记录下自己的mac安装教程，可根据直接的电脑系统去搜搜安装
+* [参考mac安装mongoDB数据库](https://blog.csdn.net/weixin_50268501/article/details/136853814?ops_request_misc=&request_id=&biz_id=102&utm_term=mac%20mongodb%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-4-136853814.nonecase&spm=1018.2226.3001.4187)
 
+**具体步骤：**
+1. 进入[MongoDB官网](https://www.mongodb.com/try/download/community)进行下载
+2. 下载完毕并且解压，重新命名为 【mongodb】文件夹
+3. 打开访达 按住快捷键command+shift+g 前往/usr/local路径
+4. 将解压并命名好的【mongodb】文件夹拖入到这个路径下
+5. 配置环境变量，在根目录输入open -e .zshrc打开.zshrc文件夹。（注意：我的终端是zsh，如果你们的终端是bash的话应该输入open .bash_profile）
+6. 在里面添加一下代码
+```text
+export PATH=${PATH}:/usr/local/mongodb/bin
+```
+7. 保存好了文件后，需要执行改文件,在根目录输入 source .zshrc 来进行执行。（注意：我的终端是zsh，如果你们的终端是bash的话应该输入source .bash_profile）
+8. 在此执行一下命令（确保是在根目录 不确定就执行 cd ~）
+```shell
+mongod --version
+```
+9. 安装mongodb成功了后，那存的数据和日志记录放哪呢。这就需要建立data和log文件夹了。进入到mongodb文件夹的目录下
 
+- 进行mongodb文件夹下
+```shell
+cd /usr/local/mongodb
+```
+- 创建
+```shell
+mkdir data log
+```
+- 给这data文件夹赋予读写权限，输入电脑开机密码，密码输入的时候看不见。
+```shell
+sudo chown [你的用户名] /usr/local/mongodb/data
+```
+- 给这log文件夹赋予读写权限，输入电脑开机密码，密码输入的时候看不见。
+```shell
+sudo chown [你的用户名] /usr/local/mongodb/log
+```
 
+10. 在mongondb路径下启动mongoDB：mongod --fork --dbpath data --logpath log/mongo.log --logappend 这句命令，看到child process started successfully, parent exiting这句话就成功启动服务了
+```shell
+mongod --fork --dbpath data --logpath log/mongo.log --logappend
+```
+11. 使用mongo指令
+12. 浏览器进入http://127.0.0.1:27017/
 
+13. 关闭数据库服务 （直接关闭）针对于（mac zsh）
+```shell
+sudo pkill -f mongod
+```
+14. 再次访问上面网址就会失败
 
+#### mac zsh配置启动脚本
+创建一个启动脚本文件，以确保命令在正确的目录中运行：
+1. 创建脚本文件：
+```zsh
+touch start_mongo.sh
+```
+2. 编辑脚本文件：
+```zsh
+nano start_mongo.sh
+```
+3. 添加以下内容：
+```zsh
+#!/bin/zsh
+cd /usr/local/mongodb
+mongod --fork --dbpath data --logpath log/mongo.log --logappend
 
+```
+保存并退出：
+保存文件并退出编辑器（按Ctrl+X退出，按Y保存，回车enter退出）。
 
+PS:同理建立了关闭mongods脚本。
+命令为：
+```zsh
+sudo pkill -f mongod
+```
+4. 赋予执行权限：
+```zsh
+chmod +x start_mongo.sh
+```
+5. 运行脚本：
+现在你可以运行脚本来启动MongoDB：
+```zsh
+./start_mongo.sh
+```
+#### mac下载可视化工具Robomongo(studio3T)
+* [下载地址](https://studio3t.com/download/)
+* [参考可视化工具Robomongo(studio3T)安装使用](https://blog.csdn.net/weixin_38245947/article/details/124588765?ops_request_misc=&request_id=&biz_id=102&utm_term=mac%20mongodb%E5%91%BD%E4%BB%A4&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-2-124588765.142^v100^pc_search_result_base6&spm=1018.2226.3001.4187)
 
+#### 文档命令
+1. 插入文档
+* 语法：db.集合名.insert(文档对象)
+```javascript
+db.user.insert({username:'ll',age:18})
+```
+2. 查询文档
+* 语法：db.集合名.find(查询条件)
+```javascript
+db.user.find({age:20})
+```
+3. 更新文档
+* 语法：db.集合名.update(查询条件,新的文档)
+```javascript
+db.user.find({name:'张三'},{$set:{age:20}})
+```
+4. 删除文档
+* 语法：db.集合名.remove(查询条件)
+```javascript
+db.user.remove({name:'张三'})
+```
+### mongoose
+#### 连接数据库
+代码及说明如下：
+```javascript
+// mongoose使用 前提得启动mongoose
+// 1-安装依赖
+// 2-引入依赖
+const mongoose = require('mongoose');
+
+// 3-连接mongodb服务
+mongoose.connect('mongodb://127.0.0.1:27017/user');
+// 补充说明：1-设置strictQuery为true
+mongoose.set('strictQuery', true);
+
+// 设置回调
+// 连接成功的回调  补充说明：2-once：事件回调函数只执行一次
+mongoose.connection.on('open', () => {
+  console.log('连接成功!');
+})
+// 连接错误的回调
+mongoose.connection.on('error', (err) => {
+  console.log('连接错误：')
+  console.error(err);
+})
+// 连接关闭的回调
+mongoose.connection.on('close', () => {
+  console.log('连接关闭');
+})
+
+// 关闭连接
+setTimeout(function () {
+  console.log('连接关闭');
+  mongoose.disconnect();
+}, 2000)
+
+```
+视频的基础知识大致学到这里，下面似乎涉及用处小，需要的时候还有机会的话再更新吧...
+
+完结撒花~~~
