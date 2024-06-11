@@ -2775,6 +2775,100 @@ setTimeout(function () {
 }, 2000)
 
 ```
+......mongoose大致学到这里，需要的在看文档好了....
+
+## 会话控制
+#### 介绍
+> 所谓会话控制是对会话进行控制。
+> 因为HTTP是一个无状态的协议，它没有办法区分多次的请求是否来自同一客户端，无法区分用户，而产品中又大量存在这样的需求，所以我们需要通过会话控制解决该问题。
+
+**常见的会话控制方式：**
+* Cookie
+* Session
+* Token
+
+### Cookie
+> cookie是HTTP服务器发送到用户浏览器并保存在本地的一小块数据
+* cookie是保存在浏览器的一小块数据
+* cookie是按照域名划分保存的
+
+**特点：**
+* 浏览器向服务器发送请求时，会自动将当前域名可用的cookie设置在请求头中，然后传递给服务器。
+* 请求头的名字也叫cookie 所以将cookie理解为一个http的请求头也是可以的
+
+#### 浏览器Cookie
+1. 禁用cookie
+> 这个操作一般不做
+
+* 网站——隐私设置和安全性设置——常规设置——阻止所有cookie
+
+2. 删除cookie
+* 网站——隐私设置和安全性设置——清除相应网站数据
+
+3. 查看cookie
+* edge浏览器查看——输入cookie查询——cookie和网站数据——点击下拉查看
+* 谷歌浏览器查看——网站链接旁的左上方小锁——cookie和网站数据——点击查看
+
+#### express Cookie
+1. 设置cookie
+*  eg:res.`cookie`('name','lhm',{})
+```javascript
+const express = require('express');
+const app = express();
+app.get('/set-cookie',(req,res)=>{
+    res.cookie('name','lhm');//会在浏览器关闭的时候，销毁
+    res.cookie('name','lhm',{maxAge:60 * 1000}); //maxAge最大存活时间 单位毫秒 但是浏览器中存的是秒s
+    res.send('home');
+})
+```
+2. 删除cookie
+* eg:res.`clearCookie`('name')
+```javascript
+const express = require('express');
+const app = express();
+app.get('/remove-cookie',(req,res)=>{
+    res.clearCookie('name');
+    res.send('remove');
+})
+```
+3. 读取cookie
+* 工具库cookie-parse,使用这个为一个cookie解析中间件
+1. 安装依赖
+```shell
+npm i cookie-parse
+```
+2. 引入使用
+```javascript
+const express = require('express');
+const cookieParse = require('cookie-parse');
+const app = express();
+app.use(cookieParse());
+```
+3. 获取cookie值
+* `req.cookies`获取到cookie值
+```javascript
+app.get('/get-cookie',(req,res)=>{
+  console.log(req.cookies);
+  console.log(res.cookies.name);
+})
+```
+### session
+> 保存到服务器的一块儿数据，保存当前访问的用户的相关信息
+
+**作用：**
+> 实现会话控制，可以识别用户的身份，快速获取当前用户的相关信息
+
+**运行流程：**
+1. 填写账号和密码校验身份，校验填入通过后创建session信息，然后通过session_id的值通过响应头返回给浏览器
+2. 有了cookie,下载发送请求会自动携带cookie,服务器通过cookie和session_id的值确定用户的身份
+
+### session与cookie区别
+* 存在位置不同。cookie存在浏览器，session 服务端
+* 安全性。cookie明文存在客户端，session是存在服务器，安全性相对较好
+* 网络传输量。 cookie设置内容过多会增加保温体积，影响传输效率。session数据存储在服务器，只是通过cookie传递id,所以不影响传输效率
+* 存储限制。cookie保存的数据不超过4k 且单个域名下的存储数量有限。session数据存储在服务器，没有限制。
+
+
 视频的基础知识大致学到这里，下面似乎涉及用处小，需要的时候还有机会的话再更新吧...
 
 完结撒花~~~
