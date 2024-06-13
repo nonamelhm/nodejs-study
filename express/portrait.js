@@ -7,7 +7,6 @@ const app = express();
 app.set('view engine', 'ejs');
 //设置模板引擎存放文件位置
 app.set('views', path.resolve(__dirname, './views'));
-
 // render响应
 app.get('/portrait', (req, res) => {
     res.render('portrait');
